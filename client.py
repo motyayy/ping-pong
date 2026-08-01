@@ -41,6 +41,17 @@ def receive():
 font_win = font.Font(None, 72)
 font_main = font.Font(None, 36)
 # --- ЗОБРАЖЕННЯ ----
+loading_bg = image.load("images/waiting.png")
+loading_bg = transform.scale(loading_bg, (WIDTH, HEIGHT))
+
+game_bg = image.load("images/bg.png")
+game_bg = transform.scale(game_bg, (WIDTH, HEIGHT))
+
+win_bg = image.load("images/win.png")
+win_bg = transform.scale(win_bg, (WIDTH, HEIGHT))
+
+lose_bg = image.load("images/lose.png")
+lose_bg = transform.scale(lose_bg, (WIDTH, HEIGHT))
 
 # --- ЗВУКИ ---
 
