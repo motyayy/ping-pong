@@ -3,12 +3,17 @@ import socket
 import json
 from threading import Thread
 
+
+
+
 # ---ПУГАМЕ НАЛАШТУВАННЯ ---
 WIDTH, HEIGHT = 800, 600
 init()
 screen = display.set_mode((WIDTH, HEIGHT))
 clock = time.Clock()
 display.set_caption("Пінг-Понг")
+
+CURRENT_SCORE = 0
 # ---СЕРВЕР ---
 def connect_to_server():
     while True:
@@ -47,13 +52,31 @@ loading_bg = transform.scale(loading_bg, (WIDTH, HEIGHT))
 game_bg = image.load("images/bg.png")
 game_bg = transform.scale(game_bg, (WIDTH, HEIGHT))
 
-win_bg = image.load("images/win.png")
+win_bg = image.load("images/winner.png")
 win_bg = transform.scale(win_bg, (WIDTH, HEIGHT))
 
 lose_bg = image.load("images/lose.png")
 lose_bg = transform.scale(lose_bg, (WIDTH, HEIGHT))
 
 # --- ЗВУКИ ---
+mixer.init()
+mixer.music.load("sounds/in_the_lobby.wav")
+mixer.music.play(-1)
+
+ball_platform_sound = mixer.Sound("sounds/Pop.ogg")
+ball_platform_sound.set_volume(1)
+
+ball_wall_sound = mixer.Sound("sounds/wall.ogg")
+ball_wall_sound.set_volume(1)
+
+lose_sound = mixer.Sound("sounds/lose.ogg")
+lose_sound.set_volume(1)
+
+win_sound = mixer.Sound("sounds/win.wav")
+win_sound.set_volume(1)
+
+Score_sound = mixer.Sound("sounds/Score.ogg")
+Score_sound.set_volume(1)
 
 # --- ГРА ---
 game_over = False
@@ -108,11 +131,16 @@ while True:
 
         if game_state['sound_event']:
             if game_state['sound_event'] == 'wall_hit':
-                # звук відбиття м'ячика від стін
-                pass
+                ball_wall_sound.play()
             if game_state['sound_event'] == 'platform_hit':
-                # звук відбиття м'ячика від платформи
-                pass
+                ball_platform_sound.play()
+        if CURRENT_SCORE != game_state['scores']:
+            CURRENT_SCORE = game_state['scores']
+            Score_sound.play()
+
+
+
+
 
     else:
         wating_text = font_main.render(f"Очікування гравців...", True, (255, 255, 255))
