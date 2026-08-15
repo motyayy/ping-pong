@@ -52,31 +52,28 @@ loading_bg = transform.scale(loading_bg, (WIDTH, HEIGHT))
 game_bg = image.load("images/bg.png")
 game_bg = transform.scale(game_bg, (WIDTH, HEIGHT))
 
-win_bg = image.load("images/win.png")
+win_bg = image.load("images/winner.png")
 win_bg = transform.scale(win_bg, (WIDTH, HEIGHT))
 
 lose_bg = image.load("images/lose.png")
 lose_bg = transform.scale(lose_bg, (WIDTH, HEIGHT))
+
+ball_img = image.load("images/ball.webp")
+ball_img = transform.scale(ball_img, (20, 20))
 
 # --- ЗВУКИ ---
 mixer.init()
 mixer.music.load("sounds/in_the_lobby.wav")
 mixer.music.play(-1)
 
-ball_platform_sound = mixer.Sound("sounds/Pop.ogg")
-ball_platform_sound.set_volume(1)
+ball_platform_sounds = mixer.Sound("sounds/Pop.ogg")
+ball_platform_sounds.set_volume(1)
 
-ball_wall_sound = mixer.Sound("sounds/wall.ogg")
-ball_wall_sound.set_volume(1)
+ball_wall_sounds = mixer.Sound("sounds/wall.ogg")
+ball_wall_sounds.set_volume(1)
 
-lose_sound = mixer.Sound("sounds/lose.ogg")
-lose_sound.set_volume(1)
-
-win_sound = mixer.Sound("sounds/win.wav")
-win_sound.set_volume(1)
-
-Score_sound = mixer.Sound("sounds/Score.ogg")
-Score_sound.set_volume(1)
+win_sounds = mixer.Sound("sounds/win.ogg")
+win_sounds.set_volume(1)
 
 # --- ГРА ---
 game_over = False
@@ -100,7 +97,64 @@ while True:
         screen.fill((20, 20, 20))
 
         if you_winner is None:  # Встановлюємо тільки один раз
+
             if game_state["winner"] == my_id:
                 you_winner = True
             else:
                 you_winner = False
+
+        if you_winner:
+            text = "Ти переміг!"
+            end_bg = win_bg
+        else:
+            text = "Пощастить наступним разом!"
+            end_bg = lose_bg
+
+        win_text = font_win.render(text, True, (255, 215, 0))
+        text_rect = win_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        screen.blit(end_bg, (0, 0))
+        screen.blit(win_text, text_rect)
+
+        text = font_win.render('К - рестарт', True, (255, 215, 0))
+        text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 120))
+        screen.blit(text, text_rect)
+
+        display.update()
+        continue  # Блокує гру після перемоги
+
+    if game_state:
+        screen.blit(game_bg, (0, 0))
+        draw.rect(screen, (0, 255, 0), (20, game_state['paddles']['0'], 20, 100))
+        draw.rect(screen, (255, 0, 255), (WIDTH - 40, game_state['paddles']['1'], 20, 100))
+        # draw.circle(screen, (255, 255, 255), (game_state['ball']['x'], game_state['ball']['y']), 10)
+        screen.blit(ball_img, (game_state['ball']['x'] + 10, game_state['ball']['y'] + 10))
+        score_text = font_main.render(f"{game_state['scores'][0]} : {game_state['scores'][1]}", True, (255, 255, 255))
+        screen.blit(score_text, (WIDTH // 2 -25, 20))
+
+        if game_state['sound_event']:
+            if game_state['sound_event'] == 'wall_hit':
+                ball_wall_sounds.play()
+            if game_state['sound_event'] == 'platform_hit':
+                ball_platform_sounds.play()
+        if CURRENT_SCORE != game_state['scores']:
+            CURRENT_SCORE = game_state['scores']
+
+
+
+
+
+
+    else:
+        wating_text = font_main.render(f"Очікування гравців...", True, (255, 255, 255))
+        screen.blit(loading_bg, (0, 0))
+        screen.blit(wating_text, (WIDTH // 2 - 25, 20))
+
+
+    display.update()
+    clock.tick(60)
+
+    keys = key.get_pressed()
+    if keys[K_w]:
+        client.send(b"UP")
+    elif keys[K_s]:
+        client.send(b"DOWN")
